@@ -3,7 +3,7 @@
   "main": "./lib/quarkbox",
   "version": "0.0.0",
   "description": "A short description of your package",
-  "activationEvents": ["quarkbox:build"],
+  "activationEvents": ["quarkbox:buildandrun", "quarkbox:build"],
   "repository": "https://github.com/atom/quarkbox",
   "license": "MIT",
   "engines": {

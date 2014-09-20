@@ -5,6 +5,7 @@
         'submenu': [
             'label': 'Quarkbox'
             'submenu': [
+                { 'label': 'Build and Run', 'command': 'quarkbox:buildandrun' }
                 { 'label': 'Build', 'command': 'quarkbox:build' }
             ]
         ]
