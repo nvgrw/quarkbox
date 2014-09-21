@@ -1,3 +1,5 @@
+## 0.0.7
+* Fixed default Windows DOSBox path
 ## 0.0.6
 * Spaces in filenames now automatically replaced with underscores
 * Long filenames shortened internally (note: first 8 characters of filenames still need to be unique)
