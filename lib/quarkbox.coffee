@@ -51,7 +51,10 @@ quark = {
             -c \"MOUNT T #{@kUtilPath}\" \
             -c \"MOUNT A #{ph.dirname(path)}\" \
             -c \"A:\" \
+            -c \"@ECHO OFF\" \
+            -c \"CLS\" \
             -c \"A:\\#{progName}\" \
+            -c \"PAUSE\" \
             -c \"EXIT\"",
             {cwd: ph.dirname(path)}, (err, sout, serr) =>
 
