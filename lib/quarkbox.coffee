@@ -3,15 +3,18 @@ cp = require "child_process"
 ph = require "path"
 fs = require "fs"
 
-atom.config.setDefaults("quarkbox", saveBeforeBuild:true, pauseAfterRun:true)
+registerDefaults = ->
+    atom.config.setDefaults("quarkbox", saveBeforeBuild:true, pauseAfterRun:true)
 
-switch os.platform()
-    when "darwin" # Mac OS
-        atom.config.setDefaults("quarkbox", DosBoxExecutable: "/Applications/DOSBox.app/Contents/MacOS/DOSBox");
-    when "win32" # Windows
-        atom.config.setDefaults("quarkbox", DosBoxExecutable: "C:\\Program Files (x86)\\DOSBox-0.74\\DOSBox.exe");
-    else # Possibly Linux, but I don't know the install directory
-        atom.config.setDefaults("quarkbox", DosBoxExecutable: "/");
+    switch os.platform()
+        when "darwin" # Mac OS
+            atom.config.setDefaults("quarkbox", DosBoxExecutable: "/Applications/DOSBox.app/Contents/MacOS/DOSBox");
+        when "win32" # Windows
+            atom.config.setDefaults("quarkbox", DosBoxExecutable: "C:\\Program Files (x86)\\DOSBox-0.74\\DOSBox.exe");
+        else # Possibly Linux, but I don't know the install directory
+            atom.config.setDefaults("quarkbox", DosBoxExecutable: "/");
+
+registerDefaults()
 
 quark = {
     kTPPath: ph.join(atom.packages.resolvePackagePath("quarkbox"), ph.join("TP", "BIN"))
@@ -108,6 +111,7 @@ quark = {
 
 module.exports =
     activate: ->
+        registerDefaults()
         atom.workspaceView.command "quarkbox:buildandrun", => @buildandrun()
         atom.workspaceView.command "quarkbox:build", => @build()
 
