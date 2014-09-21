@@ -6,10 +6,10 @@ fs = require "fs"
 switch os.platform()
     when "darwin" # Mac OS
         atom.config.setDefaults("quarkbox", DosBoxExecutable: "/Applications/DOSBox.app/Contents/MacOS/DOSBox");
-    when "win33" # Windows
+    when "win32" # Windows
         atom.config.setDefaults("quarkbox", DosBoxExecutable: "C:\\Program Files (x86)\\DOSBox-0.74");
     else # Possibly Linux, but I don't know the install directory
-        atom.config.setDefaults("quarkbox", DosBoxExecutable: "");
+        atom.config.setDefaults("quarkbox", DosBoxExecutable: "/");
 
 quark = {
     kTPPath: ph.join(atom.packages.resolvePackagePath("quarkbox"), ph.join("TP", "BIN"))
