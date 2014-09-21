@@ -3,6 +3,8 @@ cp = require "child_process"
 ph = require "path"
 fs = require "fs"
 
+atom.config.setDefaults("quarkbox", saveBeforeBuild:true, pauseAfterRun:true)
+
 switch os.platform()
     when "darwin" # Mac OS
         atom.config.setDefaults("quarkbox", DosBoxExecutable: "/Applications/DOSBox.app/Contents/MacOS/DOSBox");
@@ -24,39 +26,54 @@ quark = {
         if editor
             path = editor.getPath()
             if path != null and ph.extname(path).toLowerCase() == ".pas"
+                progName = ph.basename(path, ph.extname(path))
+                newProgName = progName.replace(/\s/g, "_");
+                if progName != newProgName # If there are spaces, we rename the file to have underscores. Also remove the original.
+                    newPath = ph.join(ph.dirname(path), newProgName + ph.extname(path))
+                    editor.saveAs(newPath)
+                    fs.unlinkSync(path)
+                    path = newPath;
                 return [true, path]
         if showErrorMessage
             alert "Make sure that you are compiling a .pas file!"
         [false]
 
-    build: (path) ->
-        progName = ph.basename(path, ph.extname(path))
+    launchDOS: (path, append, callback) ->
         dosexc = atom.config.get "quarkbox.DosBoxExecutable"
-        cp.exec "#{dosexc} \
+        cp.exec "\"#{dosexc}\" \
             -c \"MOUNT C #{@kTPPath}\" \
             -c \"MOUNT T #{@kUtilPath}\" \
             -c \"MOUNT A #{ph.dirname(path)}\" \
-            -c \"A:\" \
-            -c \"C:\\TPC.EXE #{progName} > T:\\STDOUT\" \
-            -c \"EXIT\"",
-            {cwd: ph.dirname(path)}, (err, sout, serr) =>
+            -c \"A:\" " + append, {cwd: ph.dirname(path)}, callback
+
+    getProgName: (path) ->
+        progName = ph.basename(path, ph.extname(path))
+        if progName.length > 8
+            progName = progName.substr(0, 6) + "~1"
+        progName
+
+    build: (path) ->
+        progName = @getProgName path
+        if atom.config.get "quarkbox.saveBeforeBuild"
+            editor = atom.workspace.getActiveTextEditor()
+            if editor
+                editor.save()
+
+        @launchDOS path,
+            "-c \"C:\\TPC.EXE \\\"#{progName}\\\" > T:\\STDOUT\" \
+            -c \"EXIT\"", (err, sout, serr) =>
                 if !err
                     @analyzeOutput(path)
 
     run: (path) ->
-        progName = ph.basename(path, ph.extname(path))
-        dosexc = atom.config.get "quarkbox.DosBoxExecutable"
-        cp.exec "#{dosexc} \
-            -c \"MOUNT C #{@kTPPath}\" \
-            -c \"MOUNT T #{@kUtilPath}\" \
-            -c \"MOUNT A #{ph.dirname(path)}\" \
-            -c \"A:\" \
-            -c \"@ECHO OFF\" \
+        progName = @getProgName path
+        pause = ""
+        if atom.config.get "quarkbox.pauseAfterRun"
+            pause = "-c \"PAUSE\" "
+        @launchDOS path,
+            "-c \"@ECHO OFF\" \
             -c \"CLS\" \
-            -c \"A:\\#{progName}\" \
-            -c \"PAUSE\" \
-            -c \"EXIT\"",
-            {cwd: ph.dirname(path)}, (err, sout, serr) =>
+            -c \"A:\\#{progName}.EXE\" " + pause + "-c \"EXIT\"", (err, sout, serr) =>
 
     analyzeOutput: (path) ->
         contents = fs.readFileSync @kOutPath, {encoding:"utf-8"}
