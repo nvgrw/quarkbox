@@ -4,7 +4,11 @@ ph = require "path"
 fs = require "fs"
 
 registerDefaults = ->
-    atom.config.setDefaults("quarkbox", saveBeforeBuild:true, pauseAfterRun:true)
+    atom.config.setDefaults "quarkbox",
+        saveBeforeBuild:true
+        pauseAfterRun:true
+        overrideConfiguration:false
+        customConfigurationPath: "Only necessary if overriding configuration"
 
     switch os.platform()
         when "darwin" # Mac OS
@@ -43,7 +47,12 @@ quark = {
 
     launchDOS: (path, append, callback) ->
         dosexc = atom.config.get "quarkbox.DosBoxExecutable"
+        config = ""
+        if atom.config.get "quarkbox.overrideConfiguration"
+            config = "-conf \"" + (atom.config.get "quarkbox.customConfigurationPath") + "\""
+
         cp.exec "\"#{dosexc}\" \
+            " + config + " \
             -c \"MOUNT C #{@kTPPath}\" \
             -c \"MOUNT T #{@kUtilPath}\" \
             -c \"MOUNT A #{ph.dirname(path)}\" \

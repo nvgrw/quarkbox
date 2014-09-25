@@ -1,3 +1,7 @@
+## 0.0.9
+* Specify a custom configuration file to pass to DOSBox.
+This is optional, the default configuration file will be used by default.
+
 ## 0.0.8
 * Register settings defaults before and during activation
 
