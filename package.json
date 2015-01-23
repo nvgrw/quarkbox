@@ -2,18 +2,14 @@
   "name": "quarkbox",
   "main": "./lib/quarkbox",
   "version": "0.0.9",
-  "description": "Build and run TurboPascal applications within Atom",
-  "activationEvents": [
-    "quarkbox:buildandrun",
-    "quarkbox:build"
-  ],
+  "description": "Build and run TurboPascal applications from Atom",
   "repository": {
     "type": "git",
     "url": "git://github.com/notrodash/quarkbox.git"
   },
   "license": "MIT",
   "engines": {
-    "atom": ">0.50.0"
+    "atom": ">=0.174.0"
   },
   "dependencies": {}
 }

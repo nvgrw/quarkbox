@@ -2,29 +2,22 @@ os = require "os"
 cp = require "child_process"
 ph = require "path"
 fs = require "fs"
+packagePath = atom.packages.resolvePackagePath("quarkbox")
 
 registerDefaults = ->
-    atom.config.setDefaults "quarkbox",
-        saveBeforeBuild:true
-        pauseAfterRun:true
-        overrideConfiguration:false
-        customConfigurationPath: "Only necessary if overriding configuration"
-
     switch os.platform()
         when "darwin" # Mac OS
-            atom.config.setDefaults("quarkbox", DosBoxExecutable: "/Applications/DOSBox.app/Contents/MacOS/DOSBox");
+            atom.config.setDefaults("quarkbox", "dosBoxExecutable": "/Applications/DOSBox.app/Contents/MacOS/DOSBox");
         when "win32" # Windows
-            atom.config.setDefaults("quarkbox", DosBoxExecutable: "C:\\Program Files (x86)\\DOSBox-0.74\\DOSBox.exe");
+            atom.config.setDefaults("quarkbox", "dosBoxExecutable": "C:\\Program Files (x86)\\DOSBox-0.74\\DOSBox.exe");
         else # Possibly Linux, but I don't know the install directory
-            atom.config.setDefaults("quarkbox", DosBoxExecutable: "/");
-
-registerDefaults()
+            atom.config.setDefaults("quarkbox", "dosBoxExecutable": "/");
 
 quark = {
-    kTPPath: ph.join(atom.packages.resolvePackagePath("quarkbox"), ph.join("TP", "BIN"))
-    kUtilPath: ph.join(atom.packages.resolvePackagePath("quarkbox"), ph.join("UTIL"))
-    kOutPath: ph.join(atom.packages.resolvePackagePath("quarkbox"), ph.join("UTIL", "STDOUT"))
-    kActionPath: ph.join(atom.packages.resolvePackagePath("quarkbox"), ph.join("UTIL", "ACTION"))
+    kTPPath: ph.join(packagePath, ph.join("TP", "BIN"))
+    kUtilPath: ph.join(packagePath, ph.join("UTIL"))
+    kOutPath: ph.join(packagePath, ph.join("UTIL", "STDOUT"))
+    kActionPath: ph.join(packagePath, ph.join("UTIL", "ACTION"))
 
     runAfterErrorCheck: false
 
@@ -42,21 +35,21 @@ quark = {
                     path = newPath;
                 return [true, path]
         if showErrorMessage
-            alert "Make sure that you are compiling a .pas file!"
+            alert "Make sure that you are editing a TurboPascal .PAS file!"
         [false]
 
     launchDOS: (path, append, callback) ->
-        dosexc = atom.config.get "quarkbox.DosBoxExecutable"
+        dosexc = atom.config.get "quarkbox.dosBoxExecutable"
         config = ""
         if atom.config.get "quarkbox.overrideConfiguration"
             config = "-conf \"" + (atom.config.get "quarkbox.customConfigurationPath") + "\""
 
         cp.exec "\"#{dosexc}\" \
             " + config + " \
-            -c \"MOUNT C #{@kTPPath}\" \
-            -c \"MOUNT T #{@kUtilPath}\" \
-            -c \"MOUNT A #{ph.dirname(path)}\" \
-            -c \"A:\" " + append, {cwd: ph.dirname(path)}, callback
+            -c \'MOUNT C #{@kTPPath}\' \
+            -c \'MOUNT T #{@kUtilPath}\' \
+            -c \'MOUNT A \"#{ph.dirname(path)}\"\' \
+            -c \'A:\' " + append, {cwd: ph.dirname(path)}, callback
 
     getProgName: (path) ->
         progName = ph.basename(path, ph.extname(path))
@@ -65,38 +58,38 @@ quark = {
         progName
 
     build: (path) ->
-        progName = @getProgName path
+        progName = quark.getProgName path
         if atom.config.get "quarkbox.saveBeforeBuild"
             editor = atom.workspace.getActiveTextEditor()
             if editor
                 editor.save()
 
-        @launchDOS path,
+        quark.launchDOS path,
             "-c \"C:\\TPC.EXE \\\"#{progName}\\\" > T:\\STDOUT\" \
             -c \"EXIT\"", (err, sout, serr) =>
                 if !err
-                    @analyzeOutput(path)
+                    quark.analyzeOutput(path)
 
     run: (path) ->
-        progName = @getProgName path
+        progName = quark.getProgName path
         pause = ""
         if atom.config.get "quarkbox.pauseAfterRun"
             pause = "-c \"PAUSE\" "
-        @launchDOS path,
+        quark.launchDOS path,
             "-c \"@ECHO OFF\" \
             -c \"CLS\" \
             -c \"A:\\#{progName}.EXE\" " + pause + "-c \"EXIT\"", (err, sout, serr) =>
 
     analyzeOutput: (path) ->
         contents = fs.readFileSync @kOutPath, {encoding:"utf-8"}
-        fs.unlink(@kOutPath)
+        fs.unlink(quark.kOutPath)
 
         errorMatch = contents.match(/Error\s[0-9]+:(.+)/i)
         lineNumberMatch = contents.match(/\(([0-9]+)\):/i)
 
         if errorMatch == null and lineNumberMatch == null
-            if @runAfterErrorCheck
-                @run(path)
+            if quark.runAfterErrorCheck
+                quark.run(path)
         else
             errorMatch = errorMatch[0]
             lineNumberMatch = parseInt lineNumberMatch[0].substr(1, lineNumberMatch[0].length - 3)
@@ -104,7 +97,7 @@ quark = {
             lastLine = lastLine[lastLine.length - 1]
             errorX = lastLine.indexOf("^")
 
-            if @verifyFileType(false)[0]
+            if quark.verifyFileType(false)[0]
                 editor = atom.workspace.getActiveTextEditor()
                 editor.moveToTop()
                 editor.moveDown(lineNumberMatch-1)
@@ -114,24 +107,52 @@ quark = {
                     editor.moveToBeginingOfWord()
                 editor.selectToEndOfLine()
 
-            alert "Pascal compilation error:\n#{errorMatch}\n\nThe affected area has been highlighted"
+            alert "Pascal compilation error:\n#{errorMatch}\n\nAn approximation of the affected area has been highlighted."
             atom.workspace.open(path)
 }
 
 module.exports =
-    activate: ->
+    config:
+        saveBeforeBuild:
+            type: "boolean"
+            default: true
+            description: "Automatically saves file once build process started."
+        pauseAfterRun:
+            type: "boolean"
+            default: true
+            description: "Executes PAUSE after run to prevent DOSBox window from closing."
+        dosBoxExecutable:
+            type: "string"
+            title: "DOSBox Executable"
+            default: "/"
+            description: "Path to the DOSBox executable. If you have a custom install location this will need to be changed, otherwise the defaults should suffice."
+        overrideConfiguration:
+            type: "boolean"
+            default: false
+            description: "(Optional) Override the configuration with a custom dosbox.conf file."
+        customConfigurationPath:
+            type: "string"
+            description: "(Optional) Only necessary if overriding configuration."
+            default: ""
+
+    activate: (state) ->
         registerDefaults()
-        atom.workspaceView.command "quarkbox:buildandrun", => @buildandrun()
-        atom.workspaceView.command "quarkbox:build", => @build()
+        atom.commands.add "atom-workspace", "quarkbox:buildrun", => @buildandrun()
+        atom.commands.add "atom-workspace", "quarkbox:build", => @build()
+        atom.commands.add "atom-workspace", "quarkbox:run", => @run()
 
-    buildInvoke:->
+    preInvoke: (postInvocation) ->
         if (verified = quark.verifyFileType(true))[0]
-            quark.build verified[1]
-
-    buildandrun: ->
-        quark.runAfterErrorCheck = true
-        @buildInvoke()
+            postInvocation verified[1]
 
     build: ->
         quark.runAfterErrorCheck = false
-        @buildInvoke()
+        @preInvoke(quark.build)
+
+    run: ->
+        quark.runAfterErrorCheck = false
+        @preInvoke(quark.run)
+
+    buildandrun: ->
+        quark.runAfterErrorCheck = true
+        @preInvoke(quark.build)

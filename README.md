@@ -14,6 +14,8 @@ To Build and Run, select the Packages > Quarkbox > Build and Run option or press
 
 To Build only, select the Packages > Quarkbox > Build option or press <kbd>ctrl</kbd>+<kbd>alt</kbd>+<kbd>shift</kbd>+<kbd>o</kbd>.
 
+To Run only, select the Packages > Quarkbox > Run option or press <kbd>ctrl</kbd>+<kbd>alt</kbd>+<kbd>cmd</kbd>+<kbd>o</kbd>.
+
 ### Errors
 If there is an error during the compilation of your program, Quarkbox will halt future operations (such as running) and alert the error. The area of code that the compiler specifies will also be highlighted.
 

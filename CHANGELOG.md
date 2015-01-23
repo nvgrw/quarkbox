@@ -1,3 +1,13 @@
+## 0.1.0
+* Fixed bug that prevented the running of .PAS files with spaces in the filepath.
+* Updated for the latest Atom v0.174.0 APIs.
+* Added a run option so that programs can be run without rebuilding – <kbd>ctrl</kbd>+<kbd>alt</kbd>+<kbd>cmd</kbd>+<kbd>o</kbd> – I don't know what this maps to on Windows but hopefully it works!
+* Refined some of the output text.
+* Configuration settings should now appear as soon as Quarkbox is installed.
+* Configuration settings now have helpful descriptions.
+
+__NOTE:__
+Some configuration keys might have changed, so verify that your configuration is correct.
 ## 0.0.9
 * Specify a custom configuration file to pass to DOSBox.
 This is optional, the default configuration file will be used by default.
