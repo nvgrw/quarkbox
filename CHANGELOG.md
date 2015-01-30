@@ -1,3 +1,6 @@
+## 0.1.1
+* (Hopefully) fixed Windows not liking single quotes when passing arguments to DOSBox.
+
 ## 0.1.0
 * Fixed bug that prevented the running of .PAS files with spaces in the filepath.
 * Updated for the latest Atom v0.174.0 APIs.

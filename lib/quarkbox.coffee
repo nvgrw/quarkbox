@@ -46,10 +46,10 @@ quark = {
 
         cp.exec "\"#{dosexc}\" \
             " + config + " \
-            -c \'MOUNT C #{@kTPPath}\' \
-            -c \'MOUNT T #{@kUtilPath}\' \
-            -c \'MOUNT A \"#{ph.dirname(path)}\"\' \
-            -c \'A:\' " + append, {cwd: ph.dirname(path)}, callback
+            -c \"MOUNT C \\\"#{@kTPPath}\\\"\" \
+            -c \"MOUNT T \\\"#{@kUtilPath}\\\"\" \
+            -c \"MOUNT A \\\"#{ph.dirname(path)}\\\"\" \
+            -c \"A:\" " + append, {cwd: ph.dirname(path)}, callback
 
     getProgName: (path) ->
         progName = ph.basename(path, ph.extname(path))
@@ -82,7 +82,7 @@ quark = {
 
     analyzeOutput: (path) ->
         contents = fs.readFileSync @kOutPath, {encoding:"utf-8"}
-        fs.unlink(quark.kOutPath)
+        fs.unlinkSync(quark.kOutPath)
 
         errorMatch = contents.match(/Error\s[0-9]+:(.+)/i)
         lineNumberMatch = contents.match(/\(([0-9]+)\):/i)
