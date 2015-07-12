@@ -9,7 +9,7 @@ registerDefaults = ->
         when "darwin" # Mac OS
             atom.config.setDefaults("quarkbox", "dosBoxExecutable": "/Applications/DOSBox.app/Contents/MacOS/DOSBox");
         when "win32" # Windows
-            atom.config.setDefaults("quarkbox", "dosBoxExecutable": "%PROGRAMFILES(x86)%\\DOSBox-0.74\\DOSBox.exe");
+            atom.config.setDefaults("quarkbox", "dosBoxExecutable": "%ProgramFiles(x86)%\\DOSBox-0.74\\DOSBox.exe");
         else # Possibly Linux, but I don't know the install directory
             atom.config.setDefaults("quarkbox", "dosBoxExecutable": "/");
 
